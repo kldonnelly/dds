@@ -1,50 +1,48 @@
 #include "idds.h"
-#include "sine.h"
-#include <math.h>
+#include "Sawtooth.h"
+
 /* Math definitions */
-#define _2PI 6.283185307f
-#define _PI 3.14159265f
+
 #define SAMPLE_RATE DDS_SAMPLE_RATE
 /* Q16.16 */
 #define FRAC 16
 #define Q16(X) (X * (float)(1 << FRAC))
 
-SineWave::SineWave()
+SawtoothWave::SawtoothWave()
 {
     frequency_L = 500;
     frequency_R = 500;
     Generate();
 }
 
-SineWave::SineWave(float freq)
+SawtoothWave::SawtoothWave(float freq)
 {
     frequency_L = freq;
     frequency_R = freq;
     Generate();
 }
 
-void SineWave::Generate()
+void SawtoothWave::Generate()
 {
     // populate table table[k]=sin(2*pi*k/N)
     int i = 0;
+
+    float length = TABLE_SIZE;
+    float amplitude = 2;
+    float delta = amplitude / length;
     for (i = 0; i < TABLE_SIZE; i++)
     {
         // calculating sine wave
-        sine[i] = sinf(_2PI * ((float)i / TABLE_SIZE));
+        Sawtooth[i] = -(amplitude / 2) + delta * i;
     }
     /* set the last byte equal to first for interpolation */
-    sine[TABLE_SIZE] = sine[0];
+    Sawtooth[TABLE_SIZE] = Sawtooth[0];
     phaseAccumulator_L = 0;
     phaseAccumulator_R = 0;
-
-     phaseIncrement_L = Q16(
-        (float)frequency_L * TABLE_SIZE / SAMPLE_RATE);
-     phaseIncrement_R = Q16(
-        (float)frequency_R * TABLE_SIZE / SAMPLE_RATE);
 }
 
-float SineWave::DDS_calculate_channel_out(uint32_t *phaseAccumulator,
-                                          uint32_t phaseIncrement, uint32_t index)
+float SawtoothWave::DDS_calculate_channel_out(uint32_t *phaseAccumulator,
+                                              uint32_t phaseIncrement, uint32_t index)
 {
     /* Increment the phase accumulator */
     *phaseAccumulator += phaseIncrement;
@@ -52,8 +50,8 @@ float SineWave::DDS_calculate_channel_out(uint32_t *phaseAccumulator,
     index = *phaseAccumulator >> 16;
 
     /* interpolation */
-    float v1 = sine[index];
-    float v2 = sine[index + 1];
+    float v1 = Sawtooth[index];
+    float v2 = Sawtooth[index + 1];
     float fmul = (*phaseAccumulator & 65535) / 65536.0f;
     //		float fmul = fix32_frac(phaseAccumulator, 16);
     float out = v1 + (v2 - v1) * fmul;
@@ -67,12 +65,16 @@ float SineWave::DDS_calculate_channel_out(uint32_t *phaseAccumulator,
     return (out);
 }
 
-void SineWave::Calculate(dmabuf_t *buffer, uint16_t buffer_size)
+void SawtoothWave::Calculate(dmabuf_t *buffer, uint16_t buffer_size)
 {
 
     uint32_t index_L = 0;
     uint32_t index_R = 0;
 
+    uint32_t phaseIncrement_L = Q16(
+        (float)frequency_L * TABLE_SIZE / SAMPLE_RATE);
+    uint32_t phaseIncrement_R = Q16(
+        (float)frequency_R * TABLE_SIZE / SAMPLE_RATE);
 
     int i = 0;
 
