@@ -4,10 +4,15 @@
 
 #define PCM_DEVICE "default"
 #define DMATRMBUF_SIZE 2046
+//#define __cplusplus
 #include "idds.h"
 #include "sine.h"
 #include "triangle.h"
 #include "Sawtooth.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <com/COM.h>
+
 int main(int argc, char *argv[])
 {
 
@@ -17,7 +22,8 @@ int main(int argc, char *argv[])
     snd_pcm_t *playback_handle;
     snd_pcm_hw_params_t *hw_params;
     float freq = 8000;
-    IWaveForm *wave_array[3];
+
+    IWaveForm* wave;
     int index = 0;
     if (argc <= 2)
     {
@@ -32,10 +38,13 @@ int main(int argc, char *argv[])
     {
         index = atoi(argv[3]);
     }
-    wave_array[0] = new TriangleWave(freq);
-    wave_array[1] = new SineWave(freq);
-    wave_array[2] = new SawtoothWave(freq);
-    // DDS_Init();
+
+
+    IClassFactory* cf;
+    DllGetClassObject(CLSID_NULL,SmartGUID(IID_IClassFactory),(void**)&cf);
+    cf->CreateInstance(NULL, SmartGUID(IID_IWaveForm),(void**) &wave);
+    wave->SetFreq(1500);
+
 
     if ((err = snd_pcm_open(&playback_handle, argv[1], SND_PCM_STREAM_PLAYBACK, 0)) < 0)
     {
@@ -109,7 +118,7 @@ int main(int argc, char *argv[])
     {
 
         // DDS_calculate((dmabuf_t *)buf, DMATRMBUF_SIZE/2, &phase_accumulatorL, freq, &phase_accumulatorR, freq);
-        wave_array[index]->Calculate((dmabuf_t *)buf, DMATRMBUF_SIZE / 2);
+        wave->Calculate((dmabuf_t *)buf, DMATRMBUF_SIZE / 2);
 
         if ((err = snd_pcm_writei(playback_handle, buf, DMATRMBUF_SIZE / 2)) != DMATRMBUF_SIZE / 2)
         {
