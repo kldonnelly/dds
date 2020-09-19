@@ -1,16 +1,17 @@
 
 #include <alsa/asoundlib.h>
-#include "dds.h"
+//#include "dds.h"
 
 #define PCM_DEVICE "default"
 #define DMATRMBUF_SIZE 2046
+#include <initguid.h>
 #include "idds.h"
 #include <dlfcn.h>
 #include <stdio.h>
 #include <stdlib.h>
 
+//
 
-UUID_DEFINE(CLSID_SineWave,0x3b,0x36,0xf6,0xbc,0xfa,0xd7,0x41,0x77,0x89,0x59,0x64,0x7f,0x80,0xa5,0x95,0xb6);
 
 int main(int argc, char *argv[])
 {
@@ -37,7 +38,7 @@ int main(int argc, char *argv[])
 
 	IWaveForm *wave;
 	IClassFactory* cf;
-	DllGetClassObject(CLSID_SineWave,IID_IClassFactory,&cf);
+	DllGetClassObject(&CLSID_SineWave,&IID_IClassFactory,&cf);
 
 	cf->lpVtbl->CreateInstance(cf,0,&IID_IWaveForm,&wave);
 	if (argc > 2)
@@ -119,8 +120,6 @@ int main(int argc, char *argv[])
 
 	for (i = 0; i < 10000; ++i)
 	{
-
-		// DDS_calculate((dmabuf_t *)buf, DMATRMBUF_SIZE/2, &phase_accumulatorL, freq, &phase_accumulatorR, freq);
 		wave->lpVtbl->Calculate(wave,(dmabuf_t *)buf, DMATRMBUF_SIZE / 2);
 
 		if ((err = snd_pcm_writei(playback_handle, buf, DMATRMBUF_SIZE / 2)) != DMATRMBUF_SIZE / 2)

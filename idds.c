@@ -1,4 +1,6 @@
 
+
+#include "guiddef.h"
 #include "idds.h"
 
 

@@ -1,5 +1,8 @@
+
+#include <initguid.h>
+//#include "guiddef.h"
 #include "idds.h"
-#include "sine.h"
+//#include "sine.h"
 #include <math.h>
 /* Math definitions */
 #define _2PI 6.283185307f
@@ -100,6 +103,7 @@ static HRESULT  classQueryInterface(struct IClassFactory *this, REFIID factoryGu
 		// Call my IClassFactory's AddRef
 		this->lpVtbl->AddRef(this);
 
+
 		// Return (to the caller) a ptr to my IClassFactory
 		*ppv = this;
 
@@ -149,8 +153,7 @@ HRESULT  DllGetClassObject(REFCLSID objGuid,
 		// We'll let our IClassFactory's
 		// QueryInterface do that, because it also
 		// checks the IClassFactory GUID and does other book-keeping.
-		hr = classQueryInterface(&MyIClassFactoryObj,
-				factoryGuid, factoryHandle);
+		hr = classQueryInterface(&MyIClassFactoryObj,factoryGuid, factoryHandle);
 	}
 	else
 	{

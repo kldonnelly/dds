@@ -8,7 +8,7 @@
 #ifndef DDS_SYNTH_H_
 #define DDS_SYNTH_H_
 #include <stdint.h>
-#include "dds_defs.h"
+#include <dds_defs.h>
 
 
 

@@ -68,7 +68,7 @@
 # define DECLARE_INTERFACE_(i,b) DECLARE_INTERFACE(i)
 #endif
 
-#include "guiddef.h"
+#include <guiddef.h>
 
 #ifndef _ERROR_STATUS_T_DEFINED
 typedef unsigned long error_status_t;

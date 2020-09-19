@@ -4,27 +4,18 @@
 #include <stdint.h>
 #include "dds_defs.h"
 #ifdef __com
-#include <uuid/uuid.h>
-#include <com/WinError.h>
-#include <com/COM.h>
 
 #define MIDL_DEFINE_GUID(type,name,l,w1,w2,b1,b2,b3,b4,b5,b6,b7,b8) \
         const type name = {l,w1,w2,{b1,b2,b3,b4,b5,b6,b7,b8}}
-
 #endif
 
-
-MIDL_DEFINE_GUID(PlainGUID, IID_IWaveForm,0x304e42cb,0xe6d8,0x40c0,0xa0,0x9f,0xa3,0x62,0xf1,0x2b,0x42,0x8d);
-
-//MIDL_DEFINE_GUID(IID, IID_IWaveForm,0x304e42cb,0xe6d8,0x40c0,0xa0,0x9f,0xa3,0x62,0xf1,0x2b,0x42,0x8d);
-
-//UUID_DEFINE(IID_IUnknown,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0xC0,0x00,0x00,0x00,0x00,0x00,0x00,0x046);
-//MMIDL_DEFINE_GUID(IID, IID_IWaveForm,0x304e42cb,0xe6d8,0x40c0,0xa0,0x9f,0xa3,0x62,0xf1,0x2b,0x42,0x8d);
 
 #define TABLE_SIZE 1024
 struct IWaveForm;
 
 #ifdef __cplusplus
+#include <com/COM.h>
+#include <com/WinError.h>
 class IWaveForm
 {
 protected:
@@ -49,58 +40,25 @@ public:
 };
 #else
 #ifdef __com
-#include <uuid/uuid.h>
-//#include "WinError.h"
-//#include "types.h"
+//#include <uuid/uuid.h>
+#include "WinError.h"
+#include "types.h"
 #endif
+
+#define STDMETHODCALLTYPE
 
 #ifdef __com
 
-UUID_DEFINE(IID_IUnknown,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0xC0,0x00,0x00,0x00,0x00,0x00,0x00,0x046);
-UUID_DEFINE(IID_IClassFactory,0x00,0x00,0x00,0x01,0x00,0x00,0x00,0x00,0xC0,0x00,0x00,0x00,0x00,0x00,0x00,0x46);
-
-#include "objbase.h"
-
-#define STDMETHODCALLTYPE
-typedef struct _IUnknown IUnknown;
-typedef uuid_t IID;
-typedef uuid_t GUID;
 typedef const IID *REFCLSID;
 typedef const IID *REFIID;
+#include "objbase.h"
 
-struct IUnknown;
 
-/*
- * IUnknown interface
- */
-typedef struct IUnknown_vt
-{
-    /* IUnknown methods */
-    long ( *QueryInterface)(struct IUnknown *This, const GUID *riid,
-                                   void **ppvObject);
-    long ( *AddRef)(struct IUnknown *This);
-    long ( *Release)(struct IUnknown *This);
+DEFINE_GUID(CLSID_SineWave,0xE2E9CAE6,0x1E7B,0x4B8E,0xBA,0xBD,0xE9,0xBF,0x62,0x92,0xAC,0x29);
+DEFINE_GUID(IID_IWaveForm,0x304e42cb,0xe6d8,0x40c0,0xa0,0x9f,0xa3,0x62,0xf1,0x2b,0x42,0x8d);
 
-} IUnknown_vt;
 
-struct _IUnknown { IUnknown_vt* vt; };
-
-typedef struct IUnknown* LPUNKNOWN;
-
-#undef  INTERFACE
-#define INTERFACE   IClassFactory
-
-DECLARE_INTERFACE_(IClassFactory, IUnknown)
-{
-	// *** IUnknown methods ***
-	STDMETHOD(QueryInterface) (THIS_ REFIID riid,LPVOID* ppvObj) PURE;
-	STDMETHOD_(ULONG,AddRef) (THIS) PURE;
-	STDMETHOD_(ULONG,Release) (THIS) PURE;
-
-	// *** IClassFactory methods ***
-	STDMETHOD(CreateInstance) (THIS_ LPUNKNOWN pUnkOuter,REFIID riid,LPVOID* ppvObject) PURE;
-
-};
+#define STDMETHODCALLTYPE
 
 typedef HRESULT QueryInterfacePtr(struct IWaveForm *, REFIID, void **);
 typedef ULONG AddRefPtr(struct IWaveForm *);
@@ -147,10 +105,6 @@ HRESULT  QueryInterface(IWaveForm *this,
 ULONG  AddRef(IWaveForm *this);
 ULONG  Release(IWaveForm *this);
 void Calculate(IWaveForm *this,dmabuf_t *buffer, uint16_t buffer_size);
-
-//extern void Generate_Sine(IWaveForm *this);
-
-//static const IWaveFormVtbl IWaveForm_Vtbl = {QueryInterface,AddRef,Release,Calculate, Generate_Sine};
 
 
 float DDS_calculate_channel_out(IWaveForm *ptr, uint32_t *phaseAccumulator,

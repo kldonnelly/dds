@@ -1,3 +1,4 @@
+#include "initguid.h"
 #include "idds.h"
 #include "sine.h"
 #include <math.h>
